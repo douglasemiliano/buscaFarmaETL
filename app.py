@@ -32,7 +32,7 @@ def call_endpoint():
 
 # Configura o agendador para executar a tarefa uma vez por mês
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=call_endpoint, trigger="interval", minutes=10)
+scheduler.add_job(func=call_endpoint, trigger="interval", seconds=30)
 scheduler.start()
 
 # Garantir que o agendador seja desligado quando a aplicação for encerrada
