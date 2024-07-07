@@ -3,6 +3,7 @@ import requests
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+from datetime import datetime
 
 app = Flask(__name__)
 DOWNLOAD_FOLDER = os.path.join(os.getcwd(), 'downloads')
@@ -10,14 +11,28 @@ FILE_URL = "https://www.gov.br/saude/pt-br/composicao/sectics/farmacia-popular/a
 FILE_NAME = "farmacias_credenciadas_pfpb_atualizada.xlsx"
 
 # Define o URL do endpoint que você quer acessar
-ENDPOINT_URL = "http://127.0.0.1:5000/download"
+ENDPOINT_URL = "https://buscafarmaapi.onrender.com/actuator/health"
+FRONT_URL = "https://buscafarma.onrender.com"
 def call_endpoint():
+    timestamp = datetime.now()
     response = requests.get(ENDPOINT_URL)
-    print(f"Endpoint called, status code: {response.status_code}")
+    responseFront = requests.get(FRONT_URL)
+    print(f"Horário da chamada ao endpoint: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+    if response.status_code == 200:
+        # Imprimir o horário e o conteúdo da resposta
+        print("Resposta do endpoint /actuator/health:")
+        print("codigo", response.status_code)
+        print(response.json())
+    else:
+        print(f"Falha ao acessar o endpoint. Status code: {response.status_code}")
+        print("Mensagem de erro:", response.text)
+
+    print("Response front: ", responseFront.status_code)
+
 
 # Configura o agendador para executar a tarefa uma vez por mês
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=call_endpoint, trigger="interval", weeks=4)
+scheduler.add_job(func=call_endpoint, trigger="interval", minutes=10)
 scheduler.start()
 
 # Garantir que o agendador seja desligado quando a aplicação for encerrada
